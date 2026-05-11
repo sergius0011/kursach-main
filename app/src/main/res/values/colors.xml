@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Основной градиент фона -->
+    <color name="warm_gradient_start">#FFF9C4</color>
+    <color name="warm_gradient_end">#FFE0B2</color>
+
+    <!-- Цвета карточек -->
+    <color name="warm_card_bg">#FFFFFF</color>
+    <color name="warm_card_gradient_start">#FFF3E0</color>
+    <color name="warm_card_gradient_end">#FFECB3</color>
+    <color name="warm_card_stroke">#FFD180</color>
+
+    <!-- Теплые оттенки для статусов -->
+    <color name="warm_green">#8BC34A</color>
+    <color name="warm_green_start">#C5E1A5</color>
+    <color name="warm_green_end">#8BC34A</color>
+    <color name="warm_green_stroke">#689F38</color>
+
+    <color name="warm_red">#FF7043</color>
+    <color name="warm_red_start">#FFAB91</color>
+    <color name="warm_red_end">#FF7043</color>
+    <color name="warm_red_stroke">#F4511E</color>
+
+    <color name="warm_orange_dark">#FF9800</color>
+    <color name="warm_orange_start">#FFD180</color>
+    <color name="warm_orange_end">#FF9800</color>
+    <color name="warm_orange_stroke">#F57C00</color>
+
+    <color name="warm_yellow_start">#FFF59D</color>
+    <color name="warm_yellow_end">#FFEE58</color>
+
+    <!-- Теплые серые -->
+    <color name="warm_gray_start">#E0E0E0</color>
+    <color name="warm_gray_end">#BDBDBD</color>
+    <color name="warm_gray_stroke">#9E9E9E</color>
+
+    <!-- Цвета текста -->
+    <color name="warm_dark">#5D4037</color>
+    <color name="warm_dark_light">#795548</color>
+    <color name="white">#FFFFFF</color>
+
+    <!-- Фон для описаний -->
+    <color name="warm_light_bg">#FFF8E1</color>
+    <color name="warm_light_stroke">#FFECB3</color>
+
+    <!-- Тени -->
+    <color name="warm_shadow">#33000000</color>
+
+    <!-- Старые цвета для совместимости -->
+    <color name="black">#FF000000</color>
+
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="green">#4CAF50</color>
+    <color name="green_light">#C8E6C9</color>
+    <color name="red">#F44336</color>
+    <color name="red_light">#FFCDD2</color>
+    <color name="gray">#9E9E9E</color>
+    <color name="gray_light">#F5F5F5</color>
+</resources>
