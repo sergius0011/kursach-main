@@ -390,19 +390,6 @@ public class MainActivity extends AppCompatActivity {
                 addToLog("Подключение подтверждено");
                 sendModeToArduino(currentMode);
             }
-            else if (data.matches("\\d+")) {
-                try {
-                    int receivedMode = Integer.parseInt(data);
-                    if (receivedMode >= 1 && receivedMode <= 5) {
-                        currentMode = receivedMode;
-                        modeTextView.setText("Режим " + currentMode);
-                        modeDescriptionTextView.setText(modeDescriptions[currentMode - 1]);
-                        addToLog("Подтверждение режима " + receivedMode + " от Arduino");
-                    }
-                } catch (NumberFormatException e) {
-                    Log.e("ProcessData", "Ошибка парсинга: " + data);
-                }
-            }
             else {
                 addToLog("Получено от Arduino: " + data);
             }
