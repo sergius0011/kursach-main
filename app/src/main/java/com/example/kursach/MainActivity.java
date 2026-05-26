@@ -4,13 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -21,12 +24,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
+
+import com.github.mikephil.charting.data.Entry;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -51,6 +57,10 @@ public class MainActivity extends AppCompatActivity {
     private Button btnOpenLog;
     private Button btnTestAlarm;
     private Button btnSilenceAlarm;
+    private Button btnChangeDistance;
+    private Button btnSetDis;
+    private EditText inputDistanceEditText;
+    private ToggleButton toggleAlarmState;
 
     private View logContainer;
     private RecyclerView logRecyclerView;
@@ -62,6 +72,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String CHANNEL_NAME = "Обнаружение движения";
     private static final String CHANNEL_DESCRIPTION = "Уведомления о движении в зоне контроля";
     private static final int NOTIFICATION_ID = 1;
+    public static ArrayList<Entry> humanityList = new ArrayList<>();
+    public static ArrayList<Entry> distanceList = new ArrayList<>();
+    private static int xValueCounter = 0;
     private NotificationManager notificationManager;
 
     private Socket socket;
@@ -98,6 +111,13 @@ public class MainActivity extends AppCompatActivity {
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         handler.postDelayed(connectionCheckRunnable, 500);
+
+        inputDistanceEditText.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                // Как только поле ввода получило фокус (появилась клавиатура) — стираем текст
+                inputDistanceEditText.setText("");
+            }
+        });
     }
 
     private void initViews() {
@@ -107,8 +127,13 @@ public class MainActivity extends AppCompatActivity {
         connectionStatusTextView = findViewById(R.id.connectionStatusTextView);
 
         toggleConnection = findViewById(R.id.toggleConnection);
+        toggleAlarmState = findViewById(R.id.toggleAlarmState);
         btnTestAlarm = findViewById(R.id.btnTestAlarm);
         btnSilenceAlarm = findViewById(R.id.btnSilenceAlarm);
+        btnChangeDistance = findViewById(R.id.btnChangeDistance);
+        btnOpenLog = findViewById(R.id.btnOpenLog);
+        btnSetDis = findViewById(R.id.btnSetDis);
+        inputDistanceEditText = findViewById(R.id.inputDistanceEditText);
 
         btnModeDown = findViewById(R.id.btnModeLeft);
         btnModeUp = findViewById(R.id.btnModeRight);
@@ -146,7 +171,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        btnTestAlarm.setOnClickListener(v -> simulateMotionDetection());
+        btnTestAlarm.setOnClickListener(v -> {
+            simulateMotionDetection();
+            sendCommandToArduino("TEST");
+        });
+
+        toggleAlarmState.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                sendCommandToArduino("ALARM_ON");
+            } else {
+                sendCommandToArduino("ALARM_OFF");
+            }
+        });
 
         btnSilenceAlarm.setOnClickListener(v -> {
             sendCommandToArduino("SILENCE");
@@ -154,9 +190,48 @@ public class MainActivity extends AppCompatActivity {
             addToLog("Звук отключен");
         });
 
+        btnChangeDistance.setOnClickListener(v -> {
+            sendCommandToArduino("DISTANCE");
+            Toast.makeText(this, "РЕжим дистанции включен", Toast.LENGTH_SHORT).show();
+            addToLog("Режим дистанции включен");
+        });
+
         Button btnClearLog = findViewById(R.id.btnClearLog);
         btnClearLog.setOnClickListener(v -> clearLog());
+
+        btnOpenLog.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ChartActivity.class);
+            startActivity(intent);
+        });
+
+        btnSetDis.setOnClickListener(v -> {
+            String inputText = inputDistanceEditText.getText().toString().trim();
+
+            if (!inputText.isEmpty()) {
+                try {
+                    int targetDistance = Integer.parseInt(inputText);
+
+                    // Проверка ограничений (авто-откат к границам)
+                    if (targetDistance > 300) {
+                        targetDistance = 300;
+                        inputDistanceEditText.setText("300"); // Корректируем текст в UI
+                        Toast.makeText(this, "Максимум 300 см", Toast.LENGTH_SHORT).show();
+                    } else if (targetDistance < 5) {
+                        targetDistance = 5;
+                        inputDistanceEditText.setText("5");   // Корректируем текст в UI
+                        Toast.makeText(this, "Минимум 5 см", Toast.LENGTH_SHORT).show();
+                    }
+
+                    sendCommandToArduino("SET_DIS:" + targetDistance);
+                    addToLog("Отправлено изменение дистанции: " + targetDistance + " см");
+
+                } catch (NumberFormatException e) {
+                    Toast.makeText(this, "Введите корректное число", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
+
 
     private void askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -245,7 +320,6 @@ public class MainActivity extends AppCompatActivity {
     private void processReceivedData(String data) {
         runOnUiThread(() -> {
             addToLog("Получено: " + data);
-
             if (data.contains("MOTION")) {
                 statusTextView.setText("Обнаружено движение!");
                 statusTextView.setTextColor(0xFFF44336);
@@ -255,6 +329,41 @@ public class MainActivity extends AppCompatActivity {
                     statusTextView.setText("Нет движения");
                     statusTextView.setTextColor(getResources().getColor(R.color.green));
                 }, 5000);
+            }
+            else if (data.startsWith("DIST_VAL:")) {
+                try {
+                    String distStr = data.substring(9).trim();
+                    int distance = Integer.parseInt(distStr);
+                    addToLog("Текущее расстояние: " + distance + " см");
+                    distanceList.add(new Entry(xValueCounter, distance));
+                    xValueCounter++;
+                    if (distanceList.size() > 20) {
+                        distanceList.remove(0);
+                        for (int i = 0; i < distanceList.size(); i++) {
+                            distanceList.get(i).setX(i);
+                        }
+                        xValueCounter = distanceList.size();
+                    }
+                } catch (Exception e) {
+                    Log.e("ProcessData", "Ошибка парсинга DIST_VAL: " + e.getMessage());
+                }
+            }
+            else if (data.startsWith("HUM_VAL:")) {
+                try {
+                    String distStr1 = data.substring(8).trim();
+                    int humanity = Integer.parseInt(distStr1);
+                    humanityList.add(new Entry(xValueCounter, humanity));
+                    xValueCounter++;
+                    if (humanityList.size() > 20) {
+                        humanityList.remove(0);
+                        for (int i = 0; i < humanityList.size(); i++) {
+                            humanityList.get(i).setX(i);
+                        }
+                        xValueCounter = humanityList.size();
+                    }
+                } catch (Exception e) {
+                    Log.e("ProcessData", "Ошибка парсинга HUM_VAL: " + e.getMessage());
+                }
             }
             else if (data.startsWith("MODE:")) {
                 try {
@@ -269,13 +378,16 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("ProcessData", "Ошибка парсинга режима: " + data);
                 }
             }
+            else if (data.startsWith("DIS:")) {
+                String distance = data.substring(4);
+                addToLog("Дистанция: " + distance);
+            }
             else if (data.startsWith("ALARM:")) {
                 String alarmState = data.substring(6);
                 addToLog("Состояние сигнализации: " + alarmState);
             }
             else if (data.equals("CONNECTED")) {
                 addToLog("Подключение подтверждено");
-                // После подтверждения отправляем текущий режим
                 sendModeToArduino(currentMode);
             }
             else if (data.matches("\\d+")) {
@@ -310,9 +422,9 @@ public class MainActivity extends AppCompatActivity {
         sendCommandToArduino("TEST");
 
         handler.postDelayed(() -> {
-            statusTextView.setText("Статус: Нет движения");
+            statusTextView.setText("Нет движения");
             statusTextView.setTextColor(getResources().getColor(R.color.green));
-        }, 1000);
+        }, 3000);
     }
 
     private void sendMotionNotification(String message) {
@@ -357,7 +469,7 @@ public class MainActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... voids) {
             try {
                 socket = new Socket(arduinoIP, arduinoPort);
-                socket.setSoTimeout(5000); // Таймаут 5 секунд
+                socket.setSoTimeout(15000);
                 writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                 reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 return true;

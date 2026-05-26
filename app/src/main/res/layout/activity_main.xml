@@ -73,6 +73,8 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
+
+
                 <TextView
                     android:id="@+id/statusTextView"
                     android:layout_width="match_parent"
@@ -161,14 +163,18 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                    android:layout_width="130dp"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
                     android:text="Режим работы"
                     android:textColor="#212121"
                     android:textSize="16sp"
                     android:textStyle="bold" />
+                </LinearLayout>
 
                 <!-- Отображение текущего режима -->
                 <LinearLayout
@@ -217,13 +223,31 @@
                         android:background="@drawable/ic_arrow_down"
                         android:scaleType="center" />
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp">
+                    <ToggleButton
+                        android:id="@+id/toggleAlarmState"
+                        android:layout_width="0dp"
+                        android:layout_height="30dp"
+                        android:layout_marginHorizontal="8dp"
+                        android:layout_weight="1"
+                        android:textOff="Включить сигнализацию"
+                        android:textOn="Отключить сигнализацию"
+                        android:textSize="14sp"
+                        android:background="@drawable/rounded_button"
+                        android:backgroundTint="#4764E4"
+                        android:textColor="@color/white" />
+                </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="5dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -249,6 +273,47 @@
                 android:textSize="14sp" />
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+            <Button
+                android:id="@+id/btnChangeDistance"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="8dp"
+                android:layout_weight="1"
+                android:text="Изменить дистанцию автоматически"
+                android:textSize="14sp"
+                android:backgroundTint="#4764E4" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+            <EditText
+                android:id="@+id/inputDistanceEditText"
+                android:layout_width="180dp"
+                android:layout_height="45dp"
+                android:padding="7dp"
+                android:background="@drawable/card_background"
+                android:text="@string/title"
+                android:singleLine="true"
+                android:textStyle="italic"
+                >
+            </EditText>
+
+            <Button
+                android:id="@+id/btnSetDis"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="8dp"
+                android:layout_weight="1"
+                android:text="Отправить"
+                android:textSize="14sp"
+                android:backgroundTint="#4764E4" />
+        </LinearLayout>
         <!-- Лог событий -->
         <androidx.cardview.widget.CardView
             android:id="@+id/logContainer"
@@ -298,5 +363,23 @@
                     android:padding="8dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <Button
+                android:id="@+id/btnOpenLog"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="8dp"
+                android:layout_weight="1"
+                android:layout_marginTop="10dp"
+                android:text="Отладочная информация"
+                android:textSize="14sp"
+                android:backgroundTint="#4764E4" />
+
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>
+
