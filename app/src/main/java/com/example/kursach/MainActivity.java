@@ -327,9 +327,7 @@ public class MainActivity extends AppCompatActivity {
                 sendMotionNotification("Обнаружено движение в зоне контроля!");
                 handler.postDelayed(() -> {
                     statusTextView.setText("Нет движения");
-                    statusTextView.setTextColor(getResources().getColor(R.color.green));
-                }, 5000);
-            }
+                    statusTextView.setTextColor(getResources().getColor(R.color.green));, 5000);}
             else if (data.startsWith("DIST_VAL:")) {
                 try {
                     String distStr = data.substring(9).trim();
@@ -340,14 +338,10 @@ public class MainActivity extends AppCompatActivity {
                     if (distanceList.size() > 20) {
                         distanceList.remove(0);
                         for (int i = 0; i < distanceList.size(); i++) {
-                            distanceList.get(i).setX(i);
-                        }
-                        xValueCounter = distanceList.size();
-                    }
+                            distanceList.get(i).setX(i);}
+                        xValueCounter = distanceList.size();}
                 } catch (Exception e) {
-                    Log.e("ProcessData", "Ошибка парсинга DIST_VAL: " + e.getMessage());
-                }
-            }
+                    Log.e("ProcessData", "Ошибка парсинга DIST_VAL: " + e.getMessage());}}
             else if (data.startsWith("HUM_VAL:")) {
                 try {
                     String distStr1 = data.substring(8).trim();
@@ -357,14 +351,10 @@ public class MainActivity extends AppCompatActivity {
                     if (humanityList.size() > 20) {
                         humanityList.remove(0);
                         for (int i = 0; i < humanityList.size(); i++) {
-                            humanityList.get(i).setX(i);
-                        }
-                        xValueCounter = humanityList.size();
-                    }
+                            humanityList.get(i).setX(i);}
+                        xValueCounter = humanityList.size();}
                 } catch (Exception e) {
-                    Log.e("ProcessData", "Ошибка парсинга HUM_VAL: " + e.getMessage());
-                }
-            }
+                    Log.e("ProcessData", "Ошибка парсинга HUM_VAL: " + e.getMessage());}}
             else if (data.startsWith("MODE:")) {
                 try {
                     int receivedMode = Integer.parseInt(data.substring(5));
@@ -372,29 +362,20 @@ public class MainActivity extends AppCompatActivity {
                         currentMode = receivedMode;
                         modeTextView.setText("Режим " + currentMode);
                         modeDescriptionTextView.setText(modeDescriptions[currentMode - 1]);
-                        addToLog("Подтверждение режима " + receivedMode + " от Arduino");
-                    }
+                        addToLog("Подтверждение режима " + receivedMode + " от Arduino");}
                 } catch (NumberFormatException e) {
-                    Log.e("ProcessData", "Ошибка парсинга режима: " + data);
-                }
-            }
+                    Log.e("ProcessData", "Ошибка парсинга режима: " + data);}}
             else if (data.startsWith("DIS:")) {
                 String distance = data.substring(4);
-                addToLog("Дистанция: " + distance);
-            }
+                addToLog("Дистанция: " + distance);}
             else if (data.startsWith("ALARM:")) {
                 String alarmState = data.substring(6);
-                addToLog("Состояние сигнализации: " + alarmState);
-            }
+                addToLog("Состояние сигнализации: " + alarmState);}
             else if (data.equals("CONNECTED")) {
                 addToLog("Подключение подтверждено");
-                sendModeToArduino(currentMode);
-            }
+                sendModeToArduino(currentMode);}
             else {
-                addToLog("Получено от Arduino: " + data);
-            }
-        });
-    }
+                addToLog("Получено от Arduino: " + data);}});}
 
     private void updateModeDisplay() {
         modeTextView.setText("Режим " + currentMode);
